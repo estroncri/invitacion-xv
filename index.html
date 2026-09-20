@@ -99,6 +99,10 @@ body{
   animation:fl-c 19s ease-in-out infinite alternate}
 .bg-fl-bl{bottom:-30px;left:-70px;width:30vw;max-width:190px;opacity:.22;background-image:var(--fl-a);
   animation:fl-d 21s ease-in-out infinite alternate}
+.bg-fl-ml{top:38%;left:-96px;width:24vw;max-width:150px;opacity:.13;background-image:var(--fl-b);
+  animation:fl-a 23s ease-in-out infinite alternate}
+.bg-fl-mr{top:56%;right:-96px;width:24vw;max-width:150px;opacity:.13;background-image:var(--fl-a);
+  animation:fl-c 25s ease-in-out infinite alternate}
 @keyframes fl-a{0%{transform:translate(0,0) scale(1)}100%{transform:translate(7px,9px) scale(1.05)}}
 @keyframes fl-b{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-8px,-7px) scale(1.06)}}
 @keyframes fl-c{0%{transform:scaleX(-1) translate(0,0)}100%{transform:scaleX(-1) translate(8px,7px) scale(1.05)}}
@@ -321,11 +325,10 @@ body{
   opacity:0;
   transform:translateY(34px) rotateX(-68deg) scale(.92);
   filter:blur(9px);
-  background:linear-gradient(100deg,var(--silver) 0%,#fff 24%,var(--silver-lt) 44%,#fff 64%,var(--silver) 100%);
-  background-size:320% 100%;
+  background:linear-gradient(100deg,#dde5f2 0%,#fff 22%,var(--silver-lt) 44%,#fff 68%,#dde5f2 100%);
+  background-size:230% 100%;
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
-  will-change:transform,opacity,filter;
 }
 .wds.go .wd{
   animation:wd-in .95s cubic-bezier(.2,.9,.25,1) both, ch-shine 6.5s ease-in-out infinite;
@@ -338,9 +341,19 @@ body{
 }
 @keyframes ch-shine{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 
+/* Cuando la entrada termina se saca 'wd-in' de la lista de animaciones.
+   Asi el fill-mode deja de imponer filter:blur(0) y el texto vuelve a
+   pintarse nitido, sin capa de GPU de por medio. */
+.wds.settled .wd{
+  animation:ch-shine 6.5s ease-in-out infinite;
+  animation-delay:calc(var(--i) * .09s);
+  opacity:1;transform:none;filter:none;
+}
+
 .ltrs-s .ch{display:inline-block;opacity:0;transform:translateY(14px);filter:blur(4px);color:var(--silver)}
 .ltrs-s.go .ch{animation:chs-in .6s ease-out both;animation-delay:calc(var(--i) * .032s)}
 @keyframes chs-in{0%{opacity:0;transform:translateY(14px);filter:blur(4px)}100%{opacity:1;transform:none;filter:blur(0)}}
+.ltrs-s.settled .ch{animation:none;opacity:1;transform:none;filter:none}
 
 /* entradas de bloques */
 .rv{opacity:0;transform:translateY(40px);transition:opacity 1s ease,transform 1s cubic-bezier(.25,.46,.45,.94),filter 1s ease}
@@ -359,21 +372,25 @@ body{
   font-size:clamp(.7rem,3.1vw,.9rem);letter-spacing:5px;text-transform:uppercase;
   color:var(--silver);text-shadow:0 2px 18px rgba(0,0,0,.85);
 }
-.script-xl{
-  font-family:'Great Vibes',cursive;font-size:clamp(3.4rem,13.5vw,5.6rem);
-  line-height:1.26;margin:14px 0;
-  filter:drop-shadow(0 0 30px rgba(192,192,192,.32)) drop-shadow(0 3px 22px rgba(0,0,0,.85));
+/* NADA de filter/drop-shadow sobre texto recortado con background-clip:
+   Chrome lo manda a una capa de GPU y lo rasteriza a baja resolucion, y por
+   eso las letras salian granuladas. El resplandor va DETRAS, en un ::before. */
+.script-xl,.script-lg,.script-md{
+  font-family:'Great Vibes',cursive;
+  position:relative;
+  text-rendering:optimizeLegibility;
 }
-.script-lg{
-  font-family:'Great Vibes',cursive;font-size:clamp(2.9rem,11.5vw,4.6rem);
-  line-height:1.28;margin:10px 0;
-  filter:drop-shadow(0 0 26px rgba(192,192,192,.28)) drop-shadow(0 3px 20px rgba(0,0,0,.85));
+.script-xl::before,.script-lg::before,.script-md::before{
+  content:'';position:absolute;z-index:-1;pointer-events:none;
+  left:50%;top:50%;transform:translate(-50%,-50%);
+  width:124%;height:164%;
+  background:
+    radial-gradient(ellipse 48% 42% at 50% 50%, rgba(6,13,24,.88) 0%, rgba(6,13,24,.55) 44%, rgba(6,13,24,0) 76%),
+    radial-gradient(ellipse 58% 48% at 50% 50%, rgba(192,192,192,.17) 0%, rgba(192,192,192,0) 72%);
 }
-.script-md{
-  font-family:'Great Vibes',cursive;font-size:clamp(2.4rem,9vw,3.6rem);
-  line-height:1.3;
-  filter:drop-shadow(0 0 22px rgba(192,192,192,.24)) drop-shadow(0 3px 18px rgba(0,0,0,.85));
-}
+.script-xl{font-size:clamp(3.4rem,13.5vw,5.6rem);line-height:1.26;margin:14px 0}
+.script-lg{font-size:clamp(2.9rem,11.5vw,4.6rem);line-height:1.28;margin:10px 0}
+.script-md{font-size:clamp(2.4rem,9vw,3.6rem);line-height:1.3}
 .body-txt{
   font-family:'Cormorant Garamond',serif;
   font-size:clamp(1.22rem,4.9vw,1.6rem);font-style:italic;font-weight:300;
@@ -558,6 +575,69 @@ body{
 .audio-btn.off .i-on{display:none}
 .audio-btn.off .i-off{display:block}
 
+/* ══════════════════════════════════════════════════════════
+   VINETA — oscurece los bordes: da profundidad y hace que el
+   texto se lea limpio por encima del fondo cargado
+   ══════════════════════════════════════════════════════════ */
+#vig{
+  position:fixed;inset:0;z-index:5;pointer-events:none;
+  background:
+    radial-gradient(ellipse 92% 74% at 50% 44%,
+      rgba(6,13,24,0) 34%, rgba(6,13,24,.34) 70%, rgba(6,13,24,.72) 100%);
+}
+
+/* ══════════════════════════════════════════════════════════
+   PUNTOS DE LUZ — bokeh suave, mas grande y lento que las estrellas
+   ══════════════════════════════════════════════════════════ */
+.pt{
+  position:absolute;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(233,237,245,.9) 0%,rgba(192,192,192,.32) 38%,rgba(192,192,192,0) 70%);
+  animation:pt-drift ease-in-out infinite alternate;
+}
+@keyframes pt-drift{
+  0%{transform:translate(0,0) scale(.72);opacity:.16}
+  100%{transform:translate(var(--px),var(--py)) scale(1.25);opacity:.72}
+}
+
+/* ══════════════════════════════════════════════════════════
+   PETALOS — caen despacio y van girando
+   ══════════════════════════════════════════════════════════ */
+.pet{position:fixed;pointer-events:none;z-index:3;opacity:0;
+  filter:drop-shadow(0 0 6px rgba(192,192,192,.3))}
+@keyframes pet-fall{
+  0%{opacity:0;transform:translate(0,-8vh) rotate(0deg)}
+  9%{opacity:.62}
+  35%{transform:translate(38px,28vh) rotate(150deg)}
+  62%{transform:translate(-30px,58vh) rotate(310deg)}
+  88%{opacity:.3}
+  100%{opacity:0;transform:translate(26px,104vh) rotate(520deg)}
+}
+
+/* ══════════════════════════════════════════════════════════
+   MAPA DEL LUGAR
+   ══════════════════════════════════════════════════════════ */
+.map-frame{
+  position:relative;margin:26px auto 0;width:100%;max-width:430px;
+  aspect-ratio:16/11;border-radius:18px;overflow:hidden;
+  background:#0d1b30;
+  border:1px solid rgba(192,192,192,.3);
+  box-shadow:0 20px 48px rgba(0,0,0,.58), inset 0 0 44px rgba(74,111,165,.14);
+}
+.map-frame iframe{
+  position:absolute;inset:0;width:100%;height:100%;border:0;display:block;
+  /* el embed de Google viene claro; esto lo lleva al azul de la invitacion */
+  filter:invert(1) hue-rotate(186deg) saturate(.6) brightness(.94) contrast(1.06);
+}
+.map-frame::after{
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:18px;
+  box-shadow:inset 0 0 40px rgba(6,13,24,.55);
+}
+.map-cap{
+  font-family:'Montserrat',sans-serif;font-weight:300;
+  font-size:clamp(.58rem,2.5vw,.68rem);letter-spacing:2.6px;text-transform:uppercase;
+  color:rgba(192,192,192,.72);margin-top:12px;
+}
+
 @media (max-height:640px){
   .slide{padding:64px 20px 132px}
   .script-xl{font-size:clamp(3rem,12vw,4.4rem)}
@@ -579,8 +659,12 @@ body{
   <div class="bg-fl bg-fl-br"></div>
   <div class="bg-fl bg-fl-tr"></div>
   <div class="bg-fl bg-fl-bl"></div>
+  <div class="bg-fl bg-fl-ml"></div>
+  <div class="bg-fl bg-fl-mr"></div>
+  <div id="pdots"></div>
   <div id="bg-bflies"></div>
 </div>
+<div id="vig"></div>
 
 <!-- ═══════════════ SOBRE ═══════════════ -->
 <div id="env-screen">
@@ -708,9 +792,14 @@ body{
       <div class="gl rv d2"></div>
       <p class="eyebrow rv d3">Carrera 3c # 49e 51</p>
       <p class="body-txt rv soft d4" style="margin-top:14px">Te espero a las 9:00 PM</p>
-      <div style="margin-top:34px" class="rv d5">
+      <div class="map-frame rv d5">
+        <iframe title="Mapa del lugar de la celebracion" loading="lazy" allowfullscreen
+                src="https://www.google.com/maps?q=Carrera%203C%20%2349E-51%2C%20Barranquilla%2C%20Atl%C3%A1ntico%2C%20Colombia&amp;z=16&amp;output=embed"></iframe>
+      </div>
+      <p class="map-cap rv d5">Barranquilla, Atlantico</p>
+      <div style="margin-top:26px" class="rv d6">
         <a class="btn-ghost" target="_blank" rel="noopener"
-           href="https://www.google.com/maps/search/?api=1&amp;query=Carrera%203c%20%2349e%2051">
+           href="https://www.google.com/maps/search/?api=1&amp;query=Carrera%203C%20%2349E-51%2C%20Barranquilla%2C%20Atl%C3%A1ntico%2C%20Colombia"
           <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>
           <span>Cómo llegar</span>
         </a>
@@ -792,7 +881,7 @@ body{
 
   /* ─── estrellas ─── */
   var starsEl=document.getElementById('stars');
-  for(var i=0;i<175;i++){
+  for(var i=0;i<230;i++){
     var s=document.createElement('div');
     s.className='st';
     s.style.left=(Math.random()*100)+'%';
@@ -868,7 +957,9 @@ body{
 
   /* ─── mariposas decorativas ─── */
   var spots=[[10,22,46,.30],[81,15,38,.27],[89,56,32,.23],[14,66,36,.25],
-             [48,36,26,.17],[67,79,30,.21],[32,10,28,.19],[5,43,24,.16]];
+             [48,36,26,.17],[67,79,30,.21],[32,10,28,.19],[5,43,24,.16],
+             [58,8,22,.15],[24,88,30,.20],[93,34,20,.14],[42,62,24,.16],
+             [74,48,18,.12],[18,48,20,.13]];
   var host=document.getElementById('bg-bflies');
   spots.forEach(function(sp,k){
     var w=document.createElement('div');
@@ -881,10 +972,64 @@ body{
     host.appendChild(w);
   });
 
+  /* ─── puntos de luz (bokeh) ─── */
+  var pd=document.getElementById('pdots');
+  for(var q=0;q<28;q++){
+    var pt=document.createElement('div');
+    pt.className='pt';
+    var psz=(3+Math.random()*11);
+    pt.style.width=psz+'px';pt.style.height=psz+'px';
+    pt.style.left=(Math.random()*100)+'%';
+    pt.style.top=(Math.random()*100)+'%';
+    pt.style.setProperty('--px',(Math.random()*56-28).toFixed(0)+'px');
+    pt.style.setProperty('--py',(Math.random()*56-28).toFixed(0)+'px');
+    pt.style.animationDuration=(7+Math.random()*12)+'s';
+    pt.style.animationDelay=(Math.random()*8)+'s';
+    pd.appendChild(pt);
+  }
+
+  /* ─── petalos que caen ─── */
+  function petal(){
+    var svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('viewBox','0 0 24 32');
+    svg.setAttribute('fill','none');
+    var tone=Math.random();
+    var fill = tone<0.42 ? 'rgba(205,215,235,.30)'
+             : tone<0.74 ? 'rgba(106,155,216,.26)'
+             :             'rgba(233,237,245,.24)';
+    var p=document.createElementNS(NS,'path');
+    p.setAttribute('d','M12 0 C21 9, 24 20, 12 32 C0 20, 3 9, 12 0 Z');
+    p.setAttribute('fill',fill);
+    p.setAttribute('stroke','rgba(228,235,248,.42)');
+    p.setAttribute('stroke-width','0.5');
+    svg.appendChild(p);
+    var v=document.createElementNS(NS,'path');
+    v.setAttribute('d','M12 3 C13 13, 13 22, 12 30');
+    v.setAttribute('stroke','rgba(228,235,248,.3)');
+    v.setAttribute('stroke-width','0.4');
+    v.setAttribute('fill','none');
+    svg.appendChild(v);
+    return svg;
+  }
+  setInterval(function(){
+    if(document.querySelectorAll('.pet').length>=11) return;
+    var w=document.createElement('div');
+    w.className='pet';
+    var sz=9+Math.random()*13;
+    w.style.width=sz+'px';w.style.height=(sz*1.33)+'px';
+    w.style.left=(Math.random()*96)+'%';
+    w.style.top='0';
+    var dur=11+Math.random()*10;
+    w.style.animation='pet-fall '+dur+'s linear forwards';
+    w.appendChild(petal());
+    document.body.appendChild(w);
+    setTimeout(function(){ w.remove(); }, dur*1000);
+  },1250);
+
   /* ─── mariposas que recorren toda la pantalla ─── */
   var routes=['pA','pB','pC','pD','pE','pF','pG','pH'], ri=0;
   function fly(){
-    if(document.querySelectorAll('.fly').length>=6) return;
+    if(document.querySelectorAll('.fly').length>=9) return;
     var w=document.createElement('div');
     w.className='fly';
     var size=24+Math.random()*34;
@@ -992,12 +1137,20 @@ body{
   var dots=[].slice.call(dotsEl.children);
 
   function reset(sl){
-    sl.querySelectorAll('.wds,.ltrs-s').forEach(function(e){ e.classList.remove('go'); });
+    sl.querySelectorAll('.wds,.ltrs-s').forEach(function(e){
+      e.classList.remove('go'); e.classList.remove('settled');
+    });
     sl.querySelectorAll('.rv').forEach(function(e){ e.classList.remove('on'); });
+    if(sl._settle){ clearTimeout(sl._settle); sl._settle=null; }
   }
   function play(sl){
     sl.querySelectorAll('.wds,.ltrs-s').forEach(function(e){ e.classList.add('go'); });
     sl.querySelectorAll('.rv').forEach(function(e){ e.classList.add('on'); });
+    /* terminada la entrada, se sueltan los filtros: texto nitido */
+    if(sl._settle) clearTimeout(sl._settle);
+    sl._settle=setTimeout(function(){
+      sl.querySelectorAll('.wds,.ltrs-s').forEach(function(e){ e.classList.add('settled'); });
+    },2600);
   }
 
   function go(i){
@@ -1127,8 +1280,8 @@ body{
       aBtn.hidden=false;
       live=true;
       sparkles();
-      fly(); fly(); fly();
-      setInterval(fly,2600);
+      fly(); fly(); fly(); fly();
+      setInterval(fly,1900);
       go(0);
       setTimeout(function(){ hint.classList.add('on'); },2200);
     },1500);
