@@ -1,7 +1,8 @@
 # Invitación XV Años — Jireth Carolina
 
-Invitación digital en una sola página HTML. No necesita servidor, base de datos
-ni archivos externos: las imágenes y la música van embebidas en base64.
+Invitación digital en una página HTML. No necesita servidor ni base de datos:
+las imágenes van embebidas en base64 dentro del propio `index.html`. La música
+va aparte, en `musica.mp3`, para que la página abra al instante.
 
 ## Cómo se ve
 
@@ -42,19 +43,27 @@ lugares donde aparece dentro de `index.html`: el `src` del `<iframe>` y el
 
 ## Cambiar la música
 
-La pista actual es generada, de relleno. Para cambiarla, poné tu MP3 en esta
-misma carpeta y corré:
+La música es el archivo `musica.mp3` que está al lado del `index.html`.
+Para cambiarla, poné tu MP3 en esta misma carpeta y corré:
 
 ```
 python cambiar-musica.py mi-cancion.mp3
 ```
 
-El script mete el MP3 dentro del `index.html` y deja una copia de seguridad
-(`index.html.bak`). Recomendado: un MP3 de 2 MB o menos (1-2 minutos a 96 kbps),
-porque al incrustarlo el archivo crece alrededor de un 33%.
+El script lo copia sobre `musica.mp3` y deja una copia de seguridad del
+anterior (`musica.mp3.bak`). Después hay que subirlo con `git push` para que
+el cambio llegue a la página publicada.
 
-A mano también se puede: reemplazar todo lo que va después de
-`base64,` en el `src` de `<audio id="bgm">`.
+A mano es lo mismo: reemplazar `musica.mp3` por otro MP3 con ese nombre.
+
+Va aparte y no embebida a propósito. Metida en base64 dentro del HTML, una
+canción de 4 MB deja la página en ~7 MB y el invitado tiene que bajarla
+entera antes de ver el sobre. Como archivo suelto, la página abre de una y
+el audio se descarga mientras tanto.
+
+Es una canción comercial en un repo público: queda descargable por cualquiera,
+no solo reproducible en la invitación. Para una invitación familiar no suele
+pasar nada, pero si llega un reclamo GitHub la baja.
 
 ## Datos del evento
 
