@@ -9,21 +9,36 @@ Se abre con un sobre que hay que tocar. Al abrirlo arranca la música y se pasa
 pantalla por pantalla con el botón de la flecha (también funciona deslizando
 o con las flechas del teclado).
 
-## Publicar con GitHub Pages
+## Dónde está publicada
 
-1. Settings → Pages
-2. Source: `Deploy from a branch`
-3. Branch: `main` / carpeta `/ (root)` → Save
-4. A los 1-2 minutos queda en `https://USUARIO.github.io/REPO/`
+<https://estroncri.github.io/invitacion-xv/>
+
+GitHub Pages ya está configurado en la rama `main`, carpeta raíz. Cada
+`git push` a `main` vuelve a publicar solo, en 1-2 minutos.
 
 ## Privacidad
 
 El archivo lleva el nombre completo de una menor de edad, una dirección y un
-número de teléfono. Por eso incluye `robots.txt` y la etiqueta `noindex`, para
-que no aparezca en Google. Aun así, cualquiera con el link puede verlo:
-**no publiques el repositorio como público si no querés que el código quede
-a la vista** (GitHub Pages funciona igual con repo privado en cuentas Pro;
-en cuentas gratuitas el repo debe ser público).
+número de teléfono. Incluye `robots.txt` y la etiqueta `noindex`, así que no
+debería aparecer en buscadores.
+
+**El repositorio es público**, porque GitHub Pages solo funciona con repos
+públicos en las cuentas gratuitas. Eso significa que esos datos están a la
+vista de cualquiera que abra el repo, no solo de quien tenga el link de la
+invitación. Para cerrarlo hay que pasar el repo a privado (se cae Pages) y
+publicar la invitación en Netlify, Cloudflare Pages o Vercel, que sí sirven
+sitios estáticos desde repos privados sin costo.
+
+## El mapa
+
+La pantalla «El Lugar» trae un mapa de Google embebido apuntando a
+Carrera 3C # 49E-51, Barranquilla. Va con un filtro CSS que lo oscurece para
+que combine con el azul de la invitación. Es el único recurso que la página
+pide a internet: sin conexión, todo lo demás sigue funcionando.
+
+Para mover el mapa a otra dirección hay que cambiar la consulta en los dos
+lugares donde aparece dentro de `index.html`: el `src` del `<iframe>` y el
+`href` del botón «Cómo llegar».
 
 ## Cambiar la música
 
