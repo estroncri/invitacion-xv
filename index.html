@@ -350,6 +350,7 @@ body{
   opacity:1;transform:none;filter:none;
 }
 
+.ltrs-s .wgrp{display:inline-block;white-space:nowrap}
 .ltrs-s .ch{display:inline-block;opacity:0;transform:translateY(14px);filter:blur(4px);color:var(--silver)}
 .ltrs-s.go .ch{animation:chs-in .6s ease-out both;animation-delay:calc(var(--i) * .032s)}
 @keyframes chs-in{0%{opacity:0;transform:translateY(14px);filter:blur(4px)}100%{opacity:1;transform:none;filter:blur(0)}}
@@ -1102,15 +1103,24 @@ body{
   /* ─── partir en letras (solo mayusculas Montserrat, no es ligada) ─── */
   function splitChars(el){
     if(el.dataset.s) return;
-    var t=el.textContent.replace(/\s+/g,' ').trim();
+    var words=el.textContent.replace(/\s+/g,' ').trim().split(' ');
     el.textContent='';
-    for(var k=0;k<t.length;k++){
-      var sp=document.createElement('span');
-      sp.className='ch';
-      sp.textContent=(t[k]===' ')?String.fromCharCode(160):t[k];
-      sp.style.setProperty('--i',k);
-      el.appendChild(sp);
-    }
+    var k=0;
+    words.forEach(function(word,wi){
+      /* cada palabra en su propio contenedor nowrap: el renglon puede
+         cortar ENTRE palabras, nunca a mitad de una */
+      var grp=document.createElement('span');
+      grp.className='wgrp';
+      for(var j=0;j<word.length;j++){
+        var sp=document.createElement('span');
+        sp.className='ch';
+        sp.textContent=word[j];
+        sp.style.setProperty('--i',k++);
+        grp.appendChild(sp);
+      }
+      el.appendChild(grp);
+      if(wi<words.length-1){ el.appendChild(document.createTextNode(' ')); k++; }
+    });
     el.classList.add('ltrs-s');
     el.dataset.s='1';
   }
