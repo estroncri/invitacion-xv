@@ -196,7 +196,46 @@ body{
 .env-fl-a{top:-92px;left:-104px;width:196px;opacity:.62;background-image:var(--fl-a);animation:fl-a 13s ease-in-out infinite alternate}
 .env-fl-b{bottom:-46px;right:-104px;width:196px;opacity:.62;background-image:var(--fl-b);animation:fl-b 15s ease-in-out infinite alternate}
 
-.envelope{position:relative;width:min(336px,84vw);aspect-ratio:306/212;perspective:1100px;z-index:2}
+.envelope{position:relative;width:min(352px,86vw);aspect-ratio:306/212;perspective:1100px;z-index:2;
+  animation:env-float 6.5s ease-in-out infinite alternate}
+@keyframes env-float{0%{transform:translateY(0) rotate(-.4deg)}100%{transform:translateY(-13px) rotate(.4deg)}}
+
+/* charco de luz debajo, late despacio */
+.env-glow{
+  position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);
+  width:172%;height:190%;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 40% 34% at 50% 50%, rgba(106,155,216,.30) 0%, rgba(106,155,216,0) 68%),
+    radial-gradient(ellipse 30% 26% at 50% 50%, rgba(233,237,245,.16) 0%, rgba(233,237,245,0) 72%);
+  animation:env-pool 4.6s ease-in-out infinite alternate;
+}
+@keyframes env-pool{0%{opacity:.6;transform:translate(-50%,-50%) scale(.9)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}}
+
+/* marco grabado por dentro, con las esquinas abiertas */
+.env-frame{
+  position:absolute;inset:11px;z-index:5;pointer-events:none;border-radius:4px;
+  border:1px solid rgba(205,216,236,.34);
+  box-shadow:inset 0 0 0 3px rgba(10,22,40,.0), inset 0 0 22px rgba(120,160,220,.10);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0 12px,#000 26px calc(100% - 26px),transparent calc(100% - 12px) 100%),
+              linear-gradient(180deg,transparent 0 12px,#000 26px calc(100% - 26px),transparent calc(100% - 12px) 100%);
+  mask-image:linear-gradient(90deg,transparent 0 12px,#000 26px calc(100% - 26px),transparent calc(100% - 12px) 100%),
+             linear-gradient(180deg,transparent 0 12px,#000 26px calc(100% - 26px),transparent calc(100% - 12px) 100%);
+  -webkit-mask-composite:source-in;mask-composite:intersect;
+  animation:frame-glow 5.5s ease-in-out infinite alternate;
+}
+@keyframes frame-glow{0%{opacity:.5}100%{opacity:1}}
+
+/* filigrana en las cuatro esquinas */
+.env-corner{position:absolute;width:23%;z-index:5;pointer-events:none;
+  stroke:rgba(214,224,242,.62);fill:none;stroke-width:1.1;
+  filter:drop-shadow(0 0 5px rgba(160,190,235,.4));
+  animation:corner-b 4.2s ease-in-out infinite alternate}
+@keyframes corner-b{0%{opacity:.45}100%{opacity:.95}}
+.ec-tl{top:7px;left:7px}
+.ec-tr{top:7px;right:7px;transform:scaleX(-1);animation-delay:.5s}
+.ec-bl{bottom:7px;left:7px;transform:scaleY(-1);animation-delay:1s}
+.ec-br{bottom:7px;right:7px;transform:scale(-1);animation-delay:1.5s}
 
 .env-back{
   position:absolute;inset:0;border-radius:9px;
@@ -228,7 +267,20 @@ body{
   font-size:clamp(.52rem,2.1vw,.64rem);letter-spacing:2.4px;text-transform:uppercase;
   color:#4b688f;line-height:1.9}
 .ec-mid{font-family:'Great Vibes',cursive;font-size:clamp(1.7rem,7vw,2.2rem);color:#16305c;margin:4% 0 1%;line-height:1.15}
-.ec-line{width:54px;height:1px;margin:4% auto;background:linear-gradient(90deg,transparent,#8fa4c4,transparent)}
+.ec-line{position:relative;width:74px;height:1px;margin:5% auto;
+  background:linear-gradient(90deg,transparent,#8fa4c4,transparent)}
+.ec-line::before{
+  content:'';position:absolute;left:50%;top:50%;width:5px;height:5px;
+  transform:translate(-50%,-50%) rotate(45deg);
+  background:#8fa4c4;box-shadow:0 0 8px rgba(143,164,196,.8);
+}
+.ec-date{font-family:'Montserrat',sans-serif;font-weight:300;
+  font-size:clamp(.46rem,1.9vw,.56rem);letter-spacing:2.6px;text-transform:uppercase;
+  color:#6d86ad;margin-top:5%}
+.env-card::before{
+  content:'';position:absolute;inset:5px;border-radius:3px;pointer-events:none;
+  border:1px solid rgba(101,130,175,.3);
+}
 .ec-name{font-family:'Great Vibes',cursive;font-size:clamp(1.2rem,5vw,1.55rem);color:#3d5c8c}
 
 .env-pocket{
@@ -256,11 +308,31 @@ body{
   background:linear-gradient(122deg,transparent 34%,rgba(255,255,255,.13) 50%,transparent 66%);
   clip-path:polygon(0 0, 100% 0, 50% 63%);
 }
+/* destello metalico que cruza la solapa cada tanto */
+.env-flap::after{
+  content:'';position:absolute;top:0;left:-60%;width:56%;height:100%;
+  background:linear-gradient(104deg,transparent 0%,rgba(255,255,255,.30) 46%,rgba(200,222,255,.16) 60%,transparent 100%);
+  clip-path:polygon(0 0, 100% 0, 50% 63%);
+  animation:flap-sheen 5.4s ease-in-out infinite;
+}
+@keyframes flap-sheen{0%{left:-60%}46%{left:106%}100%{left:106%}}
+
+/* textura tenue de damasco sobre el cuerpo del sobre */
+.env-back::after{
+  content:'';position:absolute;inset:0;border-radius:9px;pointer-events:none;
+  opacity:.5;
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(190,212,245,.07) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 75% 75%, rgba(190,212,245,.055) 0 1.5px, transparent 2px);
+  background-size:26px 26px, 34px 34px;
+  animation:damasco 22s linear infinite;
+}
+@keyframes damasco{0%{background-position:0 0,0 0}100%{background-position:26px 26px,-34px 34px}}
 .envelope.open .env-flap{transform:rotateX(178deg);z-index:1}
 
 .env-seal{
   position:absolute;left:50%;top:63%;transform:translate(-50%,-50%);
-  width:16%;aspect-ratio:1;border-radius:50%;
+  width:19.5%;aspect-ratio:1;border-radius:50%;
   background:radial-gradient(circle at 34% 30%,#5c86c2 0%,#2a4a7d 48%,#12243d 100%);
   border:1.5px solid rgba(210,218,232,.9);
   display:flex;align-items:center;justify-content:center;
@@ -272,10 +344,33 @@ body{
   0%{box-shadow:0 0 10px rgba(192,192,192,.2)}
   100%{box-shadow:0 0 26px rgba(192,192,192,.55),0 0 54px rgba(74,111,165,.3)}
 }
+/* anillo de perlitas girando alrededor del sello */
+.env-seal::before{
+  content:'';position:absolute;inset:-7px;border-radius:50%;
+  border:1.2px dotted rgba(214,224,242,.6);
+  animation:seal-ring 14s linear infinite;
+}
+@keyframes seal-ring{to{transform:rotate(360deg)}}
+/* reflejo que recorre el lacre */
+.env-seal::after{
+  content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 0deg,transparent 0deg,rgba(255,255,255,.32) 26deg,transparent 64deg,transparent 360deg);
+  animation:seal-glint 6s linear infinite;
+}
+@keyframes seal-glint{to{transform:rotate(360deg)}}
+.envelope.open .env-seal::before,.envelope.open .env-seal::after{animation:none}
 .envelope.open .env-seal{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(140deg);animation:none}
 
+.tap-chev{
+  width:22px;height:22px;margin-top:8px;fill:none;
+  stroke:rgba(205,216,236,.75);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+  animation:chev-bob 2.2s ease-in-out infinite;
+}
+@keyframes chev-bob{0%,100%{transform:translateY(-3px);opacity:.35}50%{transform:translateY(5px);opacity:1}}
+#env-screen.gone .tap-chev{opacity:0;transition:opacity .4s ease}
+
 .tap-text{
-  margin-top:44px;font-family:'Montserrat',sans-serif;font-weight:300;
+  margin-top:40px;font-family:'Montserrat',sans-serif;font-weight:300;
   font-size:clamp(.7rem,3vw,.82rem);letter-spacing:4px;text-transform:uppercase;
   color:var(--silver);animation:tap 2.2s ease-in-out infinite;
 }
@@ -352,13 +447,16 @@ body{
   opacity:0;
   transform:translateY(34px) rotateX(-68deg) scale(.92);
   filter:blur(9px);
-  background:linear-gradient(100deg,#dde5f2 0%,#fff 22%,var(--silver-lt) 44%,#fff 68%,#dde5f2 100%);
-  background-size:230% 100%;
-  -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;
+  color:#f4f8ff;
+  text-shadow:
+    0 0 1px rgba(255,255,255,.55),
+    0 0 16px rgba(192,192,192,.5),
+    0 0 44px rgba(106,155,216,.34),
+    0 2px 6px rgba(0,0,0,.92),
+    0 4px 16px rgba(0,0,0,.85);
 }
 .wds.go .wd{
-  animation:wd-in .95s cubic-bezier(.2,.9,.25,1) both, ch-shine 6.5s ease-in-out infinite;
+  animation:wd-in .95s cubic-bezier(.2,.9,.25,1) both, wd-glow 6.5s ease-in-out infinite;
   animation-delay:calc(var(--i) * .17s), calc(1.1s + var(--i) * .09s);
 }
 @keyframes wd-in{
@@ -366,19 +464,25 @@ body{
   58%{opacity:1;filter:blur(0)}
   100%{opacity:1;transform:none;filter:blur(0)}
 }
-@keyframes ch-shine{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+/* el brillo ahora late en la sombra, no en un degradado recortado */
+@keyframes wd-glow{
+  0%,100%{text-shadow:0 0 1px rgba(255,255,255,.5),0 0 13px rgba(192,192,192,.4),
+          0 0 34px rgba(106,155,216,.26),0 2px 6px rgba(0,0,0,.92),0 4px 16px rgba(0,0,0,.85)}
+  50%{text-shadow:0 0 1px rgba(255,255,255,.8),0 0 26px rgba(192,192,192,.72),
+      0 0 66px rgba(106,155,216,.52),0 2px 6px rgba(0,0,0,.92),0 4px 16px rgba(0,0,0,.85)}
+}
 
 /* Cuando la entrada termina se saca 'wd-in' de la lista de animaciones.
    Asi el fill-mode deja de imponer filter:blur(0) y el texto vuelve a
    pintarse nitido, sin capa de GPU de por medio. */
 .wds.settled .wd{
-  animation:ch-shine 6.5s ease-in-out infinite;
+  animation:wd-glow 6.5s ease-in-out infinite;
   animation-delay:calc(var(--i) * .09s);
   opacity:1;transform:none;filter:none;
 }
 
 .ltrs-s .wgrp{display:inline-block;white-space:nowrap}
-.ltrs-s .ch{display:inline-block;opacity:0;transform:translateY(14px);filter:blur(4px);color:var(--silver)}
+.ltrs-s .ch{display:inline-block;opacity:0;transform:translateY(14px);filter:blur(4px);color:inherit}
 .ltrs-s.go .ch{animation:chs-in .6s ease-out both;animation-delay:calc(var(--i) * .032s)}
 @keyframes chs-in{0%{opacity:0;transform:translateY(14px);filter:blur(4px)}100%{opacity:1;transform:none;filter:blur(0)}}
 .ltrs-s.settled .ch{animation:none;opacity:1;transform:none;filter:none}
@@ -418,7 +522,8 @@ body{
 .eyebrow{
   font-family:'Montserrat',sans-serif;font-weight:300;
   font-size:clamp(.7rem,3.1vw,.9rem);letter-spacing:5px;text-transform:uppercase;
-  color:var(--silver);text-shadow:0 2px 18px rgba(0,0,0,.85);
+  color:#dce5f5;
+  text-shadow:0 1px 3px rgba(0,0,0,.95),0 2px 18px rgba(0,0,0,.9),0 0 22px rgba(192,192,192,.22);
 }
 /* NADA de filter/drop-shadow sobre texto recortado con background-clip:
    Chrome lo manda a una capa de GPU y lo rasteriza a baja resolucion, y por
@@ -431,20 +536,23 @@ body{
 .script-xl::before,.script-lg::before,.script-md::before{
   content:'';position:absolute;z-index:-1;pointer-events:none;
   left:50%;top:50%;transform:translate(-50%,-50%);
-  width:124%;height:164%;
+  width:114%;height:140%;
   background:
-    radial-gradient(ellipse 48% 42% at 50% 50%, rgba(6,13,24,.88) 0%, rgba(6,13,24,.55) 44%, rgba(6,13,24,0) 76%),
-    radial-gradient(ellipse 58% 48% at 50% 50%, rgba(192,192,192,.17) 0%, rgba(192,192,192,0) 72%);
+    radial-gradient(ellipse 44% 38% at 50% 50%, rgba(6,13,24,.92) 0%, rgba(6,13,24,.58) 40%, rgba(6,13,24,0) 72%),
+    radial-gradient(ellipse 54% 44% at 50% 50%, rgba(74,111,165,.15) 0%, rgba(74,111,165,0) 70%);
+  animation:halo-breathe 7s ease-in-out infinite alternate;
 }
+@keyframes halo-breathe{0%{opacity:.85;transform:translate(-50%,-50%) scale(.97)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}}
 .script-xl{font-size:clamp(3.4rem,13.5vw,5.6rem);line-height:1.26;margin:14px 0}
 .script-lg{font-size:clamp(2.9rem,11.5vw,4.6rem);line-height:1.28;margin:10px 0}
 .script-md{font-size:clamp(2.4rem,9vw,3.6rem);line-height:1.3}
 .body-txt{
   font-family:'Cormorant Garamond',serif;
   font-size:clamp(1.22rem,4.9vw,1.6rem);font-style:italic;font-weight:300;
-  line-height:2;color:var(--silver-lt);
+  line-height:2;color:#eaf0fb;
   max-width:470px;margin:0 auto;
-  text-shadow:0 2px 20px rgba(0,0,0,.9);
+  text-shadow:0 1px 3px rgba(0,0,0,.95),0 2px 20px rgba(0,0,0,.92);
 }
 .body-txt em{color:#fff;font-weight:400}
 .body-txt strong{color:var(--accent-lt);font-weight:600;text-shadow:0 0 24px rgba(106,155,216,.5)}
@@ -696,7 +804,14 @@ body{
   .body-txt{line-height:1.8}
 }
 @media (prefers-reduced-motion:reduce){
-  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.2s!important}
+  /* Esta regla antes recortaba TODA animacion a .01ms, o sea congelaba la
+     invitacion entera: mariposas quietas, estrellas sin titilar, aurora
+     inmovil. Ahora se reduce lo agresivo y lo ambiental se queda vivo. */
+  .pet,.sp,.xsp{display:none!important}          /* particulas que caen */
+  .fly{animation-duration:54s!important}          /* vuelo mucho mas lento */
+  .wg-l,.wg-r{animation-duration:1.3s!important}  /* aleteo pausado */
+  .dust{display:none!important}
+  .wds.go .wd{animation-duration:.45s,7s!important}
 }
 </style>
 
@@ -723,6 +838,7 @@ body{
   <div class="env-stage">
     <div class="env-fl env-fl-a"></div>
     <div class="env-fl env-fl-b"></div>
+    <div class="env-glow"></div>
     <div class="envelope" id="envelope">
       <div class="env-back"></div>
       <div class="env-card">
@@ -730,12 +846,19 @@ body{
         <p class="ec-mid">Mis XV Años</p>
         <div class="ec-line"></div>
         <p class="ec-name">Jireth Carolina</p>
+        <p class="ec-date">7 · Noviembre · 2026</p>
       </div>
       <div class="env-pocket"></div>
       <div class="env-flap"></div>
+      <div class="env-frame"></div>
+      <svg class="env-corner ec-tl" viewBox="0 0 60 60" aria-hidden="true"><path d="M3 36 C3 17, 17 3, 36 3"/><path d="M9 36 C9 21, 21 9, 36 9" opacity=".62"/><path d="M36 3 C43 3, 48 6, 51 10"/><path d="M3 36 C3 43, 6 48, 10 51"/><path d="M15 27 C19 20, 24 16, 31 14"/><circle cx="32" cy="13" r="2" fill="rgba(214,224,242,.72)" stroke="none"/><circle cx="13" cy="32" r="1.5" fill="rgba(214,224,242,.55)" stroke="none"/></svg>
+      <svg class="env-corner ec-tr" viewBox="0 0 60 60" aria-hidden="true"><path d="M3 36 C3 17, 17 3, 36 3"/><path d="M9 36 C9 21, 21 9, 36 9" opacity=".62"/><path d="M36 3 C43 3, 48 6, 51 10"/><path d="M3 36 C3 43, 6 48, 10 51"/><path d="M15 27 C19 20, 24 16, 31 14"/><circle cx="32" cy="13" r="2" fill="rgba(214,224,242,.72)" stroke="none"/><circle cx="13" cy="32" r="1.5" fill="rgba(214,224,242,.55)" stroke="none"/></svg>
+      <svg class="env-corner ec-bl" viewBox="0 0 60 60" aria-hidden="true"><path d="M3 36 C3 17, 17 3, 36 3"/><path d="M9 36 C9 21, 21 9, 36 9" opacity=".62"/><path d="M36 3 C43 3, 48 6, 51 10"/><path d="M3 36 C3 43, 6 48, 10 51"/><path d="M15 27 C19 20, 24 16, 31 14"/><circle cx="32" cy="13" r="2" fill="rgba(214,224,242,.72)" stroke="none"/><circle cx="13" cy="32" r="1.5" fill="rgba(214,224,242,.55)" stroke="none"/></svg>
+      <svg class="env-corner ec-br" viewBox="0 0 60 60" aria-hidden="true"><path d="M3 36 C3 17, 17 3, 36 3"/><path d="M9 36 C9 21, 21 9, 36 9" opacity=".62"/><path d="M36 3 C43 3, 48 6, 51 10"/><path d="M3 36 C3 43, 6 48, 10 51"/><path d="M15 27 C19 20, 24 16, 31 14"/><circle cx="32" cy="13" r="2" fill="rgba(214,224,242,.72)" stroke="none"/><circle cx="13" cy="32" r="1.5" fill="rgba(214,224,242,.55)" stroke="none"/></svg>
       <div class="env-seal">JC</div>
     </div>
     <p class="tap-text" id="tapText">Toca para abrir</p>
+    <svg class="tap-chev" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
   </div>
 </div>
 
@@ -1138,6 +1261,8 @@ body{
     },760);
   }
 
+  sparkles();
+
   /* ─── partir por PALABRAS (titulos en cursiva) ───
      Cada palabra va en su propio span con nowrap, y entre span y span
      queda un espacio de texto normal: asi la cursiva no se rompe y la
@@ -1347,7 +1472,6 @@ body{
       nav.classList.add('on');
       aBtn.hidden=false;
       live=true;
-      sparkles();
       fly(); fly();
       go(0);
       setTimeout(function(){ hint.classList.add('on'); },2200);
