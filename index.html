@@ -83,9 +83,11 @@ body{
 @keyframes au-b{0%{transform:translate(0,0) scale(1.12)}100%{transform:translate(-15vw,-8vh) scale(1)}}
 @keyframes au-c{0%{transform:translate(0,0) scale(.88);opacity:.4}100%{transform:translate(-11vw,13vh) scale(1.18);opacity:.85}}
 
-/* estrellas */
-.st{position:absolute;background:#fff;border-radius:50%;animation:tw ease-in-out infinite alternate}
-@keyframes tw{0%{opacity:.06;transform:scale(.5)}100%{opacity:.95;transform:scale(1.35)}}
+/* Las particulas (estrellas, puntos, polvo, brillitos) ya no son nodos del
+   DOM: se dibujan en dos <canvas> con un solo bucle. Antes eran ~330 divs,
+   cada uno con su animacion CSS, o sea ~330 animaciones simultaneas. */
+#fx-bg{position:absolute;inset:0;pointer-events:none}
+#fx-top{position:fixed;inset:0;pointer-events:none;z-index:900}
 
 /* orbes bokeh */
 .orb{position:absolute;border-radius:50%;will-change:transform}
@@ -112,12 +114,6 @@ body{
 @keyframes rc{0%{transform:rotate(-4deg);opacity:.5}100%{transform:rotate(3deg) translateX(22px);opacity:.85}}
 @keyframes rd{0%{transform:rotate(1deg);opacity:.3}100%{transform:rotate(-3deg) translateX(-18px);opacity:.6}}
 
-/* polvo de luz */
-.dust{position:absolute;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(192,192,192,.25) 50%,transparent 72%)}
-@keyframes dz1{0%{transform:translate(0,0) scale(1);opacity:0}10%{opacity:.75}45%{transform:translate(16px,-28vh) scale(.78);opacity:.4}100%{transform:translate(26px,-82vh) scale(.2);opacity:0}}
-@keyframes dz2{0%{transform:translate(0,0) scale(1);opacity:0}12%{opacity:.55}50%{transform:translate(-22px,-24vh) scale(.7);opacity:.3}100%{transform:translate(-34px,-60vh) scale(.25);opacity:0}}
-
 /* FLORES — fijas en las esquinas pero respirando */
 .bg-fl{
   position:absolute;pointer-events:none;
@@ -142,7 +138,10 @@ body{
 @keyframes fl-d{0%{transform:scaleX(-1) translate(0,0)}100%{transform:scaleX(-1) translate(-7px,-8px) scale(1.05)}}
 
 /* MARIPOSAS DECORATIVAS — ancladas pero flotando */
-.bg-bf{position:absolute;pointer-events:none;filter:drop-shadow(0 0 9px rgba(192,192,192,.45))}
+/* Sin drop-shadow: una sombra difuminada sobre algo que se mueve y cuyos
+   hijos se animan obliga a re-rasterizar y recalcular el desenfoque en cada
+   fotograma. El brillo se compensa subiendo el relleno de las alas. */
+.bg-bf{position:absolute;pointer-events:none}
 @keyframes bf-hover{
   0%{transform:translate(0,0) rotate(0deg)}
   25%{transform:translate(12px,-16px) rotate(6deg)}
@@ -162,8 +161,7 @@ body{
    ══════════════════════════════════════════════════════════ */
 /* left/top forzaban un recalculo de layout por fotograma; con transform
    el compositor las mueve solo, y por eso ahora caben muchas mas */
-.fly{position:fixed;left:0;top:0;pointer-events:none;opacity:0;
-  filter:drop-shadow(0 0 7px rgba(192,192,192,.45))}
+.fly{position:fixed;left:0;top:0;pointer-events:none;opacity:0}
 
 @keyframes pA{0%{opacity:0;transform:translate(-10vw,92vh) rotate(0deg)}6%{opacity:.46}23%{transform:translate(-2vw,99vh) rotate(10deg)}40%{transform:translate(34vw,77vh) rotate(7deg)}58%{transform:translate(53vw,53vh) rotate(13deg)}75%{transform:translate(94vw,72vh) rotate(1deg)}94%{opacity:.08}100%{opacity:0;transform:translate(108vw,52vh) rotate(4deg)}}
 @keyframes pB{0%{opacity:0;transform:translate(108vw,85vh) rotate(-1deg)}8%{opacity:.42}29%{transform:translate(70vw,85vh) rotate(-7deg)}50%{transform:translate(46vw,70vh) rotate(15deg)}71%{transform:translate(14vw,91vh) rotate(-2deg)}94%{opacity:.08}100%{opacity:0;transform:translate(-10vw,72vh) rotate(6deg)}}
@@ -183,14 +181,6 @@ body{
 /* ══════════════════════════════════════════════════════════
    BRILLITOS
    ══════════════════════════════════════════════════════════ */
-#spk{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:900;overflow:hidden}
-.sp{position:absolute;border-radius:50%;opacity:0;
-  background:radial-gradient(circle,#fff 0%,var(--silver) 42%,transparent 72%);
-  animation:sp-fall linear infinite}
-@keyframes sp-fall{0%{opacity:0;transform:translateY(-12px) scale(0)}8%{opacity:1;transform:scale(1)}55%{opacity:.6}88%{opacity:.12}100%{opacity:0;transform:translateY(102vh) rotate(900deg) scale(0)}}
-.xsp{position:fixed;opacity:0;pointer-events:none;z-index:901;animation:xsp-pop ease-out infinite}
-@keyframes xsp-pop{0%{opacity:0;transform:scale(0) rotate(0)}16%{opacity:1;transform:scale(1.15) rotate(15deg)}42%{opacity:.65;transform:scale(.8) rotate(30deg)}100%{opacity:0;transform:scale(0) rotate(58deg)}}
-
 /* ══════════════════════════════════════════════════════════
    SOBRE
    ══════════════════════════════════════════════════════════ */
@@ -328,12 +318,13 @@ body{
 }
 /* destello metalico que cruza la solapa cada tanto */
 .env-flap::after{
-  content:'';position:absolute;top:0;left:-60%;width:56%;height:100%;
+  content:'';position:absolute;top:0;left:0;width:56%;height:100%;
   background:linear-gradient(104deg,transparent 0%,rgba(255,255,255,.30) 46%,rgba(200,222,255,.16) 60%,transparent 100%);
   clip-path:polygon(0 0, 100% 0, 50% 63%);
   animation:flap-sheen 5.4s ease-in-out infinite;
 }
-@keyframes flap-sheen{0%{left:-60%}46%{left:106%}100%{left:106%}}
+/* con transform en vez de left: lo mueve el compositor, sin tocar el layout */
+@keyframes flap-sheen{0%{transform:translateX(-160%)}46%{transform:translateX(290%)}100%{transform:translateX(290%)}}
 
 /* textura tenue de damasco sobre el cuerpo del sobre */
 .env-back::after{
@@ -343,9 +334,9 @@ body{
     radial-gradient(circle at 25% 25%, rgba(190,212,245,.07) 0 1.5px, transparent 2px),
     radial-gradient(circle at 75% 75%, rgba(190,212,245,.055) 0 1.5px, transparent 2px);
   background-size:26px 26px, 34px 34px;
-  animation:damasco 22s linear infinite;
+  /* la textura se queda quieta: animar background-position repinta el sobre
+     entero en cada fotograma y no se notaba el movimiento */
 }
-@keyframes damasco{0%{background-position:0 0,0 0}100%{background-position:26px 26px,-34px 34px}}
 .envelope.open .env-flap{transform:rotateX(178deg);z-index:1}
 
 .env-seal{
@@ -437,10 +428,11 @@ body{
 @keyframes halo-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 
 /* separadores */
-.gl{width:68px;height:1px;margin:22px auto;
+.gl{width:140px;height:1px;margin:22px auto;
   background:linear-gradient(90deg,transparent,var(--silver),transparent);
   animation:gl-pulse 2.8s ease-in-out infinite}
-@keyframes gl-pulse{0%,100%{opacity:.28;width:44px}50%{opacity:1;width:140px}}
+/* escala en vez de ancho: mismo efecto, sin recalcular el layout */
+@keyframes gl-pulse{0%,100%{opacity:.28;transform:scaleX(.31)}50%{opacity:1;transform:scaleX(1)}}
 
 .gl-wide{width:170px;height:1px;margin:28px auto;
   background:linear-gradient(90deg,transparent,rgba(192,192,192,.55) 20%,#fff 50%,rgba(192,192,192,.55) 80%,transparent);
@@ -772,23 +764,9 @@ body{
 @keyframes vig-b{0%{opacity:.82}100%{opacity:1}}
 
 /* ══════════════════════════════════════════════════════════
-   PUNTOS DE LUZ — bokeh suave, mas grande y lento que las estrellas
-   ══════════════════════════════════════════════════════════ */
-.pt{
-  position:absolute;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle,rgba(233,237,245,.9) 0%,rgba(192,192,192,.32) 38%,rgba(192,192,192,0) 70%);
-  animation:pt-drift ease-in-out infinite alternate;
-}
-@keyframes pt-drift{
-  0%{transform:translate(0,0) scale(.72);opacity:.16}
-  100%{transform:translate(var(--px),var(--py)) scale(1.25);opacity:.72}
-}
-
-/* ══════════════════════════════════════════════════════════
    PETALOS — caen despacio y van girando
    ══════════════════════════════════════════════════════════ */
-.pet{position:fixed;pointer-events:none;z-index:3;opacity:0;
-  filter:drop-shadow(0 0 6px rgba(192,192,192,.3))}
+.pet{position:fixed;pointer-events:none;z-index:3;opacity:0}
 @keyframes pet-fall{
   0%{opacity:0;transform:translate(0,-8vh) rotate(0deg)}
   9%{opacity:.62}
@@ -833,10 +811,9 @@ body{
   /* Esta regla antes recortaba TODA animacion a .01ms, o sea congelaba la
      invitacion entera: mariposas quietas, estrellas sin titilar, aurora
      inmovil. Ahora se reduce lo agresivo y lo ambiental se queda vivo. */
-  .pet,.sp,.xsp{display:none!important}          /* particulas que caen */
+  .pet{display:none!important}                    /* petalos que caen */
   .fly{animation-duration:54s!important}          /* vuelo mucho mas lento */
   .wg-l,.wg-r{animation-duration:1.3s!important}  /* aleteo pausado */
-  .dust{display:none!important}
   .wds.go .wd{animation-duration:.45s,7s!important}
 }
 </style>
@@ -844,7 +821,7 @@ body{
 <!-- ═══════════════ FONDO ═══════════════ -->
 <div id="bg">
   <div id="aurora"><div class="au au1"></div><div class="au au2"></div><div class="au au3"></div></div>
-  <div id="stars"></div>
+  <canvas id="fx-bg"></canvas>
   <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
   <div class="orb o4"></div><div class="orb o5"></div>
   <div class="ray r1"></div><div class="ray r2"></div><div class="ray r3"></div><div class="ray r4"></div>
@@ -854,7 +831,6 @@ body{
   <div class="bg-fl bg-fl-bl"></div>
   <div class="bg-fl bg-fl-ml"></div>
   <div class="bg-fl bg-fl-mr"></div>
-  <div id="pdots"></div>
   <div id="bg-bflies"></div>
 </div>
 <div id="vig"></div>
@@ -888,7 +864,7 @@ body{
   </div>
 </div>
 
-<div id="spk"></div>
+<canvas id="fx-top"></canvas>
 
 <!-- ══════════════════════════════════════════════════════════════
      MUSICA DE FONDO
@@ -1082,35 +1058,118 @@ body{
   'use strict';
   var NS='http://www.w3.org/2000/svg';
 
-  /* ─── estrellas ─── */
-  var starsEl=document.getElementById('stars');
-  for(var i=0;i<230;i++){
-    var s=document.createElement('div');
-    s.className='st';
-    s.style.left=(Math.random()*100)+'%';
-    s.style.top=(Math.random()*100)+'%';
-    var sz=(0.5+Math.random()*2.4)+'px';
-    s.style.width=sz;s.style.height=sz;
-    s.style.animationDuration=(1.4+Math.random()*4)+'s';
-    s.style.animationDelay=(Math.random()*5)+'s';
-    starsEl.appendChild(s);
-  }
+  /* ───────────────────────────────────────────────────────────────
+     PARTICULAS EN CANVAS
+     Antes cada estrella, punto, mota de polvo y brillito era un <div>
+     con su propia animacion CSS: ~330 nodos y ~330 animaciones a la vez,
+     y eso es lo que trababa el telefono. Ahora son dos <canvas> y un
+     unico bucle que los dibuja todos con sprites cacheados.
+     ─────────────────────────────────────────────────────────────── */
+  (function(){
+    var cvBg=document.getElementById('fx-bg'), cvTop=document.getElementById('fx-top');
+    if(!cvBg||!cvTop||!cvBg.getContext) return;
+    var cb=cvBg.getContext('2d'), ct=cvTop.getContext('2d');
+    var R=Math.random;
+    var lento=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var modesto=(navigator.hardwareConcurrency||4)<=4 || (navigator.deviceMemory||4)<=4;
 
-  /* ─── polvo ─── */
-  var bgEl=document.getElementById('bg');
-  setInterval(function(){
-    if(bgEl.querySelectorAll('.dust').length>30) return;
-    var d=document.createElement('div');
-    d.className='dust';
-    var sz=(1+Math.random()*2.8)+'px';
-    d.style.width=sz;d.style.height=sz;
-    d.style.left=(Math.random()*100)+'%';
-    d.style.bottom=(Math.random()*25)+'%';
-    var dur=9+Math.random()*11;
-    d.style.animation=(Math.random()>0.5?'dz1':'dz2')+' '+dur+'s linear forwards';
-    bgEl.appendChild(d);
-    setTimeout(function(){ d.remove(); }, dur*1000);
-  },380);
+    var N_EST=modesto?115:200, N_PTO=modesto?12:24, N_POL=modesto?12:22,
+        N_BRI=lento?0:(modesto?16:30), N_DES=lento?0:(modesto?3:6);
+
+    /* un degradado radial dibujado UNA vez y reutilizado con drawImage:
+       crear el gradiente por particula y por fotograma es carisimo */
+    function sprite(px,paradas){
+      var c=document.createElement('canvas'); c.width=c.height=px;
+      var x=c.getContext('2d');
+      var g=x.createRadialGradient(px/2,px/2,0,px/2,px/2,px/2);
+      for(var i=0;i<paradas.length;i++) g.addColorStop(paradas[i][0],paradas[i][1]);
+      x.fillStyle=g; x.fillRect(0,0,px,px); return c;
+    }
+    var sPunto=sprite(64,[[0,'rgba(255,255,255,1)'],[.38,'rgba(226,234,250,.55)'],[1,'rgba(226,234,250,0)']]);
+    var sBokeh=sprite(64,[[0,'rgba(233,237,245,.92)'],[.36,'rgba(192,192,192,.34)'],[1,'rgba(192,192,192,0)']]);
+    var sDest=(function(px){
+      var c=document.createElement('canvas'); c.width=c.height=px;
+      var x=c.getContext('2d'), r=px/2; x.translate(r,r);
+      x.beginPath(); x.moveTo(0,-r);
+      x.quadraticCurveTo(r*.1,-r*.1,r,0); x.quadraticCurveTo(r*.1,r*.1,0,r);
+      x.quadraticCurveTo(-r*.1,r*.1,-r,0); x.quadraticCurveTo(-r*.1,-r*.1,0,-r);
+      x.closePath(); x.fillStyle='rgba(255,255,255,.88)'; x.fill(); return c;
+    })(48);
+
+    var W=0,H=0;
+    function medir(){
+      var dpr=Math.min(window.devicePixelRatio||1,2);
+      W=window.innerWidth; H=window.innerHeight;
+      [[cvBg,cb],[cvTop,ct]].forEach(function(p){
+        p[0].width=Math.round(W*dpr); p[0].height=Math.round(H*dpr);
+        p[0].style.width=W+'px'; p[0].style.height=H+'px';
+        p[1].setTransform(dpr,0,0,dpr,0,0);
+      });
+    }
+    medir();
+    var tmr; window.addEventListener('resize',function(){clearTimeout(tmr);tmr=setTimeout(medir,180);});
+
+    var est=[],pto=[],pol=[],bri=[],des=[],i;
+    for(i=0;i<N_EST;i++) est.push({x:R(),y:R(),r:.5+R()*2.4,f:.25+R()*.8,p:R()*6.28});
+    for(i=0;i<N_PTO;i++) pto.push({x:R(),y:R(),r:3+R()*11,dx:R()*56-28,dy:R()*56-28,f:.05+R()*.09,p:R()*6.28});
+    function resetPol(o){o.x=R();o.y=.78+R()*.3;o.r=.8+R()*1.9;o.v=.02+R()*.032;o.d=(R()*2-1)*.014;o.t=0;o.max=.8+R()*.4;return o;}
+    for(i=0;i<N_POL;i++){ pol.push(resetPol({})); pol[i].t=R()*pol[i].max; }
+    function resetBri(o){o.x=R();o.y=-.04-R()*.25;o.r=1.2+R()*3;o.v=.06+R()*.13;return o;}
+    for(i=0;i<N_BRI;i++){ bri.push(resetBri({})); bri[i].y=R(); }
+    function resetDes(o){o.x=.04+R()*.92;o.y=.04+R()*.9;o.s=9+R()*17;o.t=0;o.dur=1+R()*1.8;o.esp=R()*2.6;return o;}
+    for(i=0;i<N_DES;i++) des.push(resetDes({}));
+
+    var ult=performance.now();
+    function paso(ahora){
+      requestAnimationFrame(paso);
+      if(document.hidden){ ult=ahora; return; }          /* nada de gastar bateria oculto */
+      var dt=Math.min((ahora-ult)/1000,.05); ult=ahora;
+      var t=ahora/1000, k,a,sz;
+
+      cb.clearRect(0,0,W,H);
+      for(k=0;k<est.length;k++){
+        var e=est[k];
+        a=.06+.89*(.5+.5*Math.sin(t*e.f*2+e.p));
+        sz=e.r*(1.1+1.3*a)*2.2;
+        cb.globalAlpha=a; cb.drawImage(sPunto,e.x*W-sz/2,e.y*H-sz/2,sz,sz);
+      }
+      for(k=0;k<pto.length;k++){
+        var q=pto[k], w=Math.sin(t*q.f*2+q.p);
+        a=.16+.56*(.5+.5*w); sz=q.r*(1.4+.6*w)*2.6;
+        cb.globalAlpha=a; cb.drawImage(sBokeh,q.x*W+q.dx*w-sz/2,q.y*H+q.dy*w-sz/2,sz,sz);
+      }
+      for(k=0;k<pol.length;k++){
+        var d=pol[k]; d.y-=d.v*dt; d.x+=d.d*dt; d.t+=dt/13;
+        if(d.y<-.06||d.t>d.max) resetPol(d);
+        a=Math.sin(Math.min(d.t/d.max,1)*Math.PI)*.8; sz=d.r*3.2;
+        cb.globalAlpha=a; cb.drawImage(sPunto,d.x*W-sz/2,d.y*H-sz/2,sz,sz);
+      }
+      cb.globalAlpha=1;
+
+      if(N_BRI||N_DES){
+        ct.clearRect(0,0,W,H);
+        for(k=0;k<bri.length;k++){
+          var b=bri[k]; b.y+=b.v*dt;
+          if(b.y>1.06) resetBri(b);
+          sz=b.r*3.4;
+          ct.globalAlpha=Math.max(0,Math.min(1,(1-b.y)*1.5))*.9;
+          ct.drawImage(sPunto,b.x*W-sz/2,b.y*H-sz/2,sz,sz);
+        }
+        for(k=0;k<des.length;k++){
+          var x2=des[k]; x2.t+=dt;
+          if(x2.t>x2.dur+x2.esp){ resetDes(x2); continue; }
+          if(x2.t<x2.esp) continue;
+          var u=(x2.t-x2.esp)/x2.dur;
+          sz=x2.s*(.3+1.05*Math.min(u*2,1));
+          ct.save(); ct.globalAlpha=Math.sin(Math.min(u,1)*Math.PI);
+          ct.translate(x2.x*W,x2.y*H); ct.rotate(u*.9);
+          ct.drawImage(sDest,-sz/2,-sz/2,sz,sz); ct.restore();
+        }
+        ct.globalAlpha=1;
+      }
+    }
+    requestAnimationFrame(paso);
+  })();
 
   /* ─── mariposa svg ─── */
   function butterfly(){
@@ -1131,12 +1190,12 @@ body{
       return g;
     }
     svg.appendChild(wing('wg-l',[
-      ['M28 22 C22 12, 6 6, 4 14 C2 20, 14 26, 28 22','rgba(205,215,235,.34)','rgba(228,235,248,.55)','0.4'],
-      ['M28 22 C24 26, 10 32, 7 28 C4 24, 16 22, 28 22','rgba(180,195,220,.26)','rgba(212,222,240,.36)','0.3']
+      ['M28 22 C22 12, 6 6, 4 14 C2 20, 14 26, 28 22','rgba(214,226,246,.46)','rgba(238,244,255,.78)','0.5'],
+      ['M28 22 C24 26, 10 32, 7 28 C4 24, 16 22, 28 22','rgba(190,206,234,.36)','rgba(222,232,250,.52)','0.4']
     ]));
     svg.appendChild(wing('wg-r',[
-      ['M32 22 C38 12, 54 6, 56 14 C58 20, 46 26, 32 22','rgba(205,215,235,.34)','rgba(228,235,248,.55)','0.4'],
-      ['M32 22 C36 26, 50 32, 53 28 C56 24, 44 22, 32 22','rgba(180,195,220,.26)','rgba(212,222,240,.36)','0.3']
+      ['M32 22 C38 12, 54 6, 56 14 C58 20, 46 26, 32 22','rgba(214,226,246,.46)','rgba(238,244,255,.78)','0.5'],
+      ['M32 22 C36 26, 50 32, 53 28 C56 24, 44 22, 32 22','rgba(190,206,234,.36)','rgba(222,232,250,.52)','0.4']
     ]));
     var b=document.createElementNS(NS,'ellipse');
     b.setAttribute('cx','30');b.setAttribute('cy','22');
@@ -1174,22 +1233,6 @@ body{
     w.appendChild(butterfly());
     host.appendChild(w);
   });
-
-  /* ─── puntos de luz (bokeh) ─── */
-  var pd=document.getElementById('pdots');
-  for(var q=0;q<28;q++){
-    var pt=document.createElement('div');
-    pt.className='pt';
-    var psz=(3+Math.random()*11);
-    pt.style.width=psz+'px';pt.style.height=psz+'px';
-    pt.style.left=(Math.random()*100)+'%';
-    pt.style.top=(Math.random()*100)+'%';
-    pt.style.setProperty('--px',(Math.random()*56-28).toFixed(0)+'px');
-    pt.style.setProperty('--py',(Math.random()*56-28).toFixed(0)+'px');
-    pt.style.animationDuration=(7+Math.random()*12)+'s';
-    pt.style.animationDelay=(Math.random()*8)+'s';
-    pd.appendChild(pt);
-  }
 
   /* ─── petalos que caen ─── */
   function petal(){
@@ -1251,43 +1294,6 @@ body{
   fly(); fly(); fly();
   [700,1500,2400,3300].forEach(function(t){ setTimeout(fly,t); });
   setInterval(fly,1100);
-
-  /* ─── brillitos ─── */
-  function sparkles(){
-    var c=document.getElementById('spk');
-    setInterval(function(){
-      if(c.children.length>40) return;
-      var sp=document.createElement('div');
-      sp.className='sp';
-      sp.style.left=(Math.random()*100)+'%';
-      sp.style.animationDuration=(3+Math.random()*6)+'s';
-      sp.style.animationDelay=(Math.random()*2)+'s';
-      var sz=(1.4+Math.random()*3.2)+'px';
-      sp.style.width=sz;sp.style.height=sz;
-      c.appendChild(sp);
-      setTimeout(function(){ sp.remove(); }, 11000);
-    },200);
-    setInterval(function(){
-      if(document.querySelectorAll('.xsp').length>8) return;
-      var x=document.createElementNS(NS,'svg');
-      x.setAttribute('viewBox','0 0 20 20');
-      x.setAttribute('class','xsp');
-      var sz=8+Math.random()*16;
-      x.style.width=sz+'px';x.style.height=sz+'px';
-      x.style.left=(Math.random()*94)+'%';
-      x.style.top=(Math.random()*90)+'%';
-      x.style.animationDuration=(1+Math.random()*2)+'s';
-      var p=document.createElementNS(NS,'path');
-      p.setAttribute('d','M10 0 L10.8 8 L20 10 L10.8 12 L10 20 L9.2 12 L0 10 L9.2 8 Z');
-      p.setAttribute('fill','rgba(255,255,255,.75)');
-      x.appendChild(p);
-      document.body.appendChild(x);
-      var d=1500+Math.random()*2400;
-      setTimeout(function(){ x.remove(); }, d);
-    },760);
-  }
-
-  sparkles();
 
   /* ─── partir por PALABRAS (titulos en cursiva) ───
      Cada palabra va en su propio span con nowrap, y entre span y span
