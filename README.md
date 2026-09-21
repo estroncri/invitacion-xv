@@ -12,10 +12,23 @@ o con las flechas del teclado).
 
 ## Dónde está publicada
 
-<https://estroncri.github.io/invitacion-xv/>
+<https://invitaciónjirethcervera.online>
 
-GitHub Pages ya está configurado en la rama `main`, carpeta raíz. Cada
-`git push` a `main` vuelve a publicar solo, en 1-2 minutos.
+**Ojo con la tilde.** El dominio comprado es `invitaciónjirethcervera.online`,
+con tilde en la ó. Es un dominio internacionalizado (IDN), y su forma real
+para las máquinas es el punycode `xn--invitacinjirethcervera-2fc.online` — que
+es lo que va en el archivo `CNAME` de este repo. La versión **sin** tilde,
+`invitacionjirethcervera.online`, es otro dominio distinto y no está
+registrado: quien la escriba a mano no llega. Por eso la invitación conviene
+repartirla siempre como link, nunca dictada.
+
+`www.` también funciona y redirige al dominio principal, igual que el viejo
+`estroncri.github.io/invitacion-xv/`.
+
+DNS en Hostinger: cuatro registros A en el apex hacia 185.199.108-111.153 y un
+CNAME `www` → `estroncri.github.io`. HTTPS emitido y forzado por GitHub.
+
+Cada `git push` a `main` vuelve a publicar solo, en 1-2 minutos.
 
 ## Privacidad
 
